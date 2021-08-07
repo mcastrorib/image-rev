@@ -1,0 +1,22 @@
+// the configured options and settings for this project
+#define IMAGEREV_VERSION_MAJOR @IMAGEREV_VERSION_MAJOR @
+#define IMAGEREV_VERSION_MINOR @IMAGEREV_VERSION_MINOR @
+
+// built-in libraries
+#cmakedefine USE_IMAGEREV
+
+// include C++ standard libraries
+#include <unistd.h>
+#include <iostream>
+
+// include opencv libraries
+#include <opencv2/core.hpp>
+#include <opencv2/core/utility.hpp>
+#include "opencv2/imgcodecs.hpp"
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/highgui.hpp>
+
+using namespace std;
+
+// define MACROS
+#define INPUT_FILE "/home/matheus/Documentos/doutorado_ic/tese/NMR/image-rev/config/image.conf"
