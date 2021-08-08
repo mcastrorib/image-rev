@@ -93,7 +93,7 @@ public:
             }
         } 
         this->parser->reset();
-         return true;
+        return true;
     }
 
 
@@ -132,7 +132,8 @@ public:
         if(this->validSource)
         {
             (*this).readSourceImages();
-            this->rev->set(this->sourceImages, this->input->getREVMethod());
+            this->rev->set(this->sourceImages, this->input->getREVMethod(), this->input->getPorePhaseColor());
+            this->rev->runAnalysis();
         }
     }
 

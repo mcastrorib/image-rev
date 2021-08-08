@@ -19,6 +19,7 @@ private:
     int first;
     int count;
     string REVMethod;
+    uchar porePhaseColor;
 
 public:
     ImageREVInput(const string inputFile)
@@ -39,6 +40,7 @@ public:
         this->first = other.first;
         this->count = other.count;
         this->REVMethod = other.REVMethod;
+        this->porePhaseColor = other.porePhaseColor;
     }
 
     virtual ~ImageREVInput()
@@ -53,6 +55,7 @@ public:
     int getFirst() { return this->first; }
     int getCount() { return this->count; }
     string getREVMethod() { return this->REVMethod; }
+    uchar getPorePhaseColor() { return this->porePhaseColor; }
 
 
 
@@ -90,7 +93,8 @@ public:
                 else if(token == "DIGITS") (*this).readDigits(content);
                 else if(token == "FIRST") (*this).readFirst(content);
                 else if(token == "COUNT") (*this).readCount(content);
-                else if(token == "REV_METHOD") (*this).readREVMethod(content);                          
+                else if(token == "REV_METHOD") (*this).readREVMethod(content);
+                else if(token == "PORE_PHASE_COLOR") (*this).readPorePhaseColor(content);                          
             }
         } 
 
@@ -142,6 +146,10 @@ public:
         this->REVMethod = content;
     }
 
+    void readPorePhaseColor(string content)
+    {
+        this->porePhaseColor = (uchar) std::stoi(content);
+    }
 };
 
 #endif

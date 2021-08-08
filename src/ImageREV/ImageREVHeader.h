@@ -24,6 +24,8 @@
 #include <opencv2/highgui.hpp>
 
 // define macros
+#define IDX2C_3D(x, y, z, lx, ly) ((x) + (y * lx) + (z * (lx * ly)))
+#define PRINT_DATA false
 
 // include ImageREV lib classes
 #include "mRNG.h"
