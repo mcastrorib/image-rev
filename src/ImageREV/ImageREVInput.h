@@ -20,6 +20,8 @@ private:
     int count;
     string REVMethod;
     uchar porePhaseColor;
+    int REVSizes;
+    int maxREVSamples;
 
 public:
     ImageREVInput(const string inputFile)
@@ -41,6 +43,8 @@ public:
         this->count = other.count;
         this->REVMethod = other.REVMethod;
         this->porePhaseColor = other.porePhaseColor;
+        this->REVSizes = other.REVSizes;
+        this->maxREVSamples = other.maxREVSamples;
     }
 
     virtual ~ImageREVInput()
@@ -56,6 +60,8 @@ public:
     int getCount() { return this->count; }
     string getREVMethod() { return this->REVMethod; }
     uchar getPorePhaseColor() { return this->porePhaseColor; }
+    int getREVSizes() { return this->REVSizes; }
+    int getMaxREVSamples() { return this->maxREVSamples; }
 
 
 
@@ -94,7 +100,9 @@ public:
                 else if(token == "FIRST") (*this).readFirst(content);
                 else if(token == "COUNT") (*this).readCount(content);
                 else if(token == "REV_METHOD") (*this).readREVMethod(content);
-                else if(token == "PORE_PHASE_COLOR") (*this).readPorePhaseColor(content);                          
+                else if(token == "PORE_PHASE_COLOR") (*this).readPorePhaseColor(content);   
+                else if(token == "REV_SIZES") (*this).readREVSizes(content);
+                else if(token == "MAX_REV_SAMPLES") (*this).readMaxREVSamples(content);                       
             }
         } 
 
@@ -149,6 +157,16 @@ public:
     void readPorePhaseColor(string content)
     {
         this->porePhaseColor = (uchar) std::stoi(content);
+    }
+
+    void readREVSizes(string content)
+    {
+        this->REVSizes = std::stoi(content);
+    }
+
+    void readMaxREVSamples(string content)
+    {
+        this->maxREVSamples = std::stoi(content);
     }
 };
 

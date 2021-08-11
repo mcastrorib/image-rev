@@ -10,6 +10,7 @@ class ImageREVApp
 {
 private:
     string source;
+    string folderName;
     bool validSource;
     vector<cv::Mat> sourceImages;
     int sourceImagesCount;
@@ -30,6 +31,7 @@ public:
         this->parser = new ImageFileParser(this->source, this->input->getDigits(), this->input->getFirst(), this->input->getCount(), this->input->getExtension());
         this->rev = new ImageREV();
         this->validSource = (*this).checkSourceImages();
+        (*this).setFolderName();
     }
 
     virtual ~ImageREVApp()
@@ -75,6 +77,7 @@ public:
             return false;
         }
 
+        cout << "Checking image data from folder " << this->input->getOriginFilePath() << endl;
         while(!quit)
         {
             try 
@@ -99,10 +102,12 @@ public:
 
     void readSourceImages()
     {
+        this->sourceImages.reserve(this->input->getCount());
         string imageFile;
         cv::Mat *image;
         bool quit = false;
-
+        
+        cout << "Reading image data from folder " << this->input->getOriginFilePath() << endl;
         while(!quit)
         {
             try 
@@ -132,20 +137,63 @@ public:
         if(this->validSource)
         {
             (*this).readSourceImages();
-            this->rev->set(this->sourceImages, this->input->getREVMethod(), this->input->getPorePhaseColor());
+            this->rev->set(this->sourceImages, 
+                           this->input->getREVMethod(), 
+                           this->input->getPorePhaseColor(),
+                           this->input->getREVSizes(),
+                           this->input->getMaxREVSamples());
             this->rev->runAnalysis();
+            this->save();
         }
     }
 
     void save()
     {
         (*this).createDestinationDir();   
+        (*this).saveAnalysis();
+    }
+
+    void saveREV()
+    {
         string fullpath = this->input->getDestinationFilePath() + this->input->getDestinationFileName() + "/" + this->input->getDestinationFileName();
         int digits = (*this).findDigits(this->sourceImagesCount);
         for(int slice = 0; slice < this->sourceImagesCount; slice++)
         {
             (*this).saveImageSlice(fullpath, slice, digits, this->input->getExtension());
         }
+    }
+
+    void saveAnalysis()
+    {
+        string filepath1 = this->folderName + "/REV_analysis_info.txt"; 
+        ofstream fileObject;
+        fileObject.open(filepath1, ios::out);
+        if (fileObject.fail())
+        {
+            cout << "Could not open file from disc." << endl;
+            exit(1);
+        }
+        fileObject << "Max_REV_samples: " << this->rev->getMaxREVsPerSize() << endl;
+        fileObject.close();
+
+        string filepath2 = this->folderName + "/REV_analysis.csv";  
+        fileObject.open(filepath2, ios::out);
+        if (fileObject.fail())
+        {
+            cout << "Could not open file from disc." << endl;
+            exit(1);
+        }
+
+        fileObject << "ID" << ",";
+        fileObject << "REV_SIZE" << ",";
+        fileObject << "MEAN_REV_POROSITY" << endl;
+        for (uint revIdx = 0; revIdx < this->rev->getREVsizes(); revIdx++)
+        {
+            fileObject << revIdx << ",";
+            fileObject << this->rev->getREVsizesData(revIdx) << ",";
+            fileObject << this->rev->getREVporositiesData(revIdx) << endl;
+        }
+        fileObject.close();
     }
 
     int findDigits(int n)
@@ -176,9 +224,15 @@ public:
         return result.str();
     }
 
+    void setFolderName()
+    {
+        this->folderName = this->input->getDestinationFilePath() + this->input->getDestinationFileName();
+        this->folderName = this->folderName + "_rs=" + std::to_string(this->input->getMaxREVSamples()); 
+    }
+
     void createDestinationDir()
     {
-        string path = this->input->getDestinationFilePath() + this->input->getDestinationFileName();
+        string path = this->folderName;
         char directory[path.size() + 1];
         strcpy(directory, path.c_str());
 
