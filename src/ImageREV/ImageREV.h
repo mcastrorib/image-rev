@@ -231,10 +231,16 @@ public:
         if(this->method == "complete")
         {
             (*this).runCompleteAnalysis();
-        } else if(this->method == "mc")
+        } 
+        else if(this->method == "mc")
         {
             (*this).runMonteCarloAnalysis();
-        } else
+        } 
+        else if(this->method == "center")
+        {
+            (*this).runCentralAnalysis();
+        } 
+        else
         {
             cout << "REV method is not set" << endl;
         }
@@ -309,6 +315,47 @@ public:
             }
 
             this->REVporositiesData[sIdx] = porositySum / (double) localREVs;
+            cout << "mean porosity: " << this->REVporositiesData[sIdx] << endl;
+        }
+    }
+
+    void runCentralAnalysis()
+    {
+        cout << "REV Centered method to be run" << endl;
+        double porositySum;
+        double REVVolume;
+        int Xcen, Ycen, Zcen;
+        int Xmin, Ymin, Zmin;
+        int size;
+
+        // Find image central point coordinates
+        Xcen = this->imageWidth / 2;
+        Ycen = this->imageHeight / 2;
+        Zcen = this->imageDepth / 2;
+
+        for (int sIdx = 0; sIdx < this->REVsizes; sIdx++)
+        {
+            porositySum = 0.0;
+            size = this->REVsizesData[sIdx];
+            REVVolume = pow((double) size, 3.0);
+            int localREVs = 1;
+            if(localREVs > this->maxREVsPerSize) 
+            { 
+                   localREVs = maxREVsPerSize;
+            }
+
+            cout << "- " << sIdx+1 << "/" << this->REVsizes << " -";
+            cout << "REVs of size " << size << " (" << this->REVsizesData[sIdx] << ")";
+            cout << " = " << localREVs << "\t REV volume: " << REVVolume << endl;
+            
+            Xmin = Xcen - (size / 2);
+            Ymin = Ycen - (size / 2);
+            Zmin = Zcen - (size / 2);
+
+            // cout << "mins: {" << Xmin << ",\t" << Ymin << ",\t" << Zmin << "}\t";
+            // cout << "maxs: {" << Xmin + size << ",\t" << Ymin + size << ",\t" << Zmin + size << "}\t"; 
+            
+            this->REVporositiesData[sIdx] = (*this).computePorosity(Xmin, Ymin, Zmin, size, REVVolume);
             cout << "mean porosity: " << this->REVporositiesData[sIdx] << endl;
         }
     }

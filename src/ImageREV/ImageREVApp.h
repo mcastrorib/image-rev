@@ -227,6 +227,7 @@ public:
     void setFolderName()
     {
         this->folderName = this->input->getDestinationFilePath() + this->input->getDestinationFileName();
+        this->folderName = this->folderName + "_rm=" + this->input->getREVMethod();
         this->folderName = this->folderName + "_rs=" + std::to_string(this->input->getMaxREVSamples()); 
     }
 
