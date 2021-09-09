@@ -19,4 +19,4 @@
 using namespace std;
 
 // define MACROS
-#define INPUT_FILE "/home/matheus/Documentos/doutorado_ic/tese/NMR/image-rev/config/image.conf"
+#define INPUT_FILE "./config/image.conf"
