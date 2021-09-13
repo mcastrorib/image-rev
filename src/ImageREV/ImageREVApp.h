@@ -18,10 +18,11 @@ private:
     
     ImageREVInput *input;
     ImageFileParser *parser;
-    ImageREV *rev;
+    ImageREVAnalyzer *rev;
+    ImageREVExtractor *extractor;
 
 public:
-    ImageREVApp(string inputFile)
+    ImageREVApp(string inputFile, string datavisPyscript)
     {
         vector<cv::Mat> sourceImages();
         vector<cv::Mat> REVImages();
@@ -29,9 +30,10 @@ public:
         this->input = new ImageREVInput(inputFile);
         this->source = this->input->getOriginFilePath() + this->input->getOriginFileName();
         this->parser = new ImageFileParser(this->source, this->input->getDigits(), this->input->getFirst(), this->input->getCount(), this->input->getExtension());
-        this->rev = new ImageREV();
+        this->rev = new ImageREVAnalyzer();
         this->validSource = (*this).checkSourceImages();
         (*this).setFolderName();
+        this->extractor = new ImageREVExtractor(this->rev, this->input->getDestinationFileName(), this->folderName, datavisPyscript);        
     }
 
     virtual ~ImageREVApp()
@@ -40,6 +42,11 @@ public:
         {
             delete this->rev;
             this->rev = NULL;
+        }
+
+        if(this->extractor != NULL)
+        {
+            this->extractor = NULL;
         }
 
         if(this->input != NULL)
@@ -100,7 +107,7 @@ public:
     }
 
 
-    void readSourceImages()
+    void readSourceImages_old()
     {
         this->sourceImages.reserve(this->input->getCount());
         string imageFile;
@@ -132,18 +139,95 @@ public:
         this->sourceImagesCount = this->sourceImages.size();
     }
 
+    void readSourceImages()
+    {
+        string imageFile;
+        cv::Mat image;
+        int imageIndex;
+        bool quit = false;
+
+        cout << "Reading image data" << endl; // from folder " << this->input->getOriginFilePath() << endl;
+
+        // Reading 1st image
+        imageFile = this->parser->next();
+        image = cv::Mat(cv::imread(imageFile));
+        if (!image.data)
+        {
+            cout << "Error: No image data in file " << imageFile << endl;
+            quit = true;
+        } else  
+        {
+            this->rev->checkFirstImage(image, this->input->getREVSizes());
+            this->rev->setArrays();
+            this->rev->readImage(image, imageIndex);
+            imageIndex++;
+        }
+
+
+        while(!quit)
+        {
+            try 
+            {
+                imageFile = this->parser->next();
+                image = cv::Mat(cv::imread(imageFile));
+                if (!image.data)
+                {
+                    cout << "Error: No image data in file " << imageFile << endl;
+                    quit = true;
+                } else  
+                {
+                    this->rev->readImage(image, imageIndex);
+                    imageIndex++;
+                }
+            } catch (const std::invalid_argument& e) 
+            {
+                // std::cerr << "exception: " << e.what() << std::endl; 
+                quit = true;
+            }
+        } 
+        this->parser->reset();
+        this->sourceImagesCount = imageIndex + 1;
+    }
+
+    void run_old()
+    {
+        if(this->validSource)
+        {
+            (*this).readSourceImages_old();
+            this->rev->set_old(this->sourceImages, 
+                               this->input->getREVMethod(), 
+                               this->input->getPorePhaseColor(),
+                               this->input->getREVSizes(),
+                               this->input->getMaxREVSamples());
+            this->rev->runAnalysis();
+            (*this).save();
+        }
+    }
+
     void run()
     {
         if(this->validSource)
         {
-            (*this).readSourceImages();
-            this->rev->set(this->sourceImages, 
+            this->rev->set(this->input->getCount(),
                            this->input->getREVMethod(), 
                            this->input->getPorePhaseColor(),
-                           this->input->getREVSizes(),
                            this->input->getMaxREVSamples());
-            this->rev->runAnalysis();
-            this->save();
+            (*this).readSourceImages();
+
+            if(this->input->getAnalysis()) 
+            {
+                this->rev->runAnalysis();
+                (*this).save();
+                
+                // Visualize REV analysis
+                if(this->input->getDatavis()) 
+                    this->extractor->showREVAnalysis();
+            }
+            
+            if(this->input->getExtract()) 
+            {
+                this->extractor->runExtraction();
+            }            
         }
     }
 
@@ -243,7 +327,7 @@ public:
         {
             mkdir(directory, 0700);
         } 
-    }
+    }    
 };
 
 #endif

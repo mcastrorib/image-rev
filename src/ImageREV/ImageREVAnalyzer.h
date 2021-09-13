@@ -1,17 +1,17 @@
-#ifndef IMAGEREV_H_
-#define IMAGEREV_H_
+#ifndef IMAGEREVANALYZER_H_
+#define IMAGEREVANALYZER_H_
 
 // include Configuration file
 #include "ImageREVHeader.h"
 
 using namespace std;
 
-class ImageREV
+class ImageREVAnalyzer
 {
 private:
     string method;
     bool validMethod;
-    int *imageData;
+    uchar *imageData;
     int imageWidth;
     int imageHeight;
     int imageDepth;
@@ -23,13 +23,15 @@ private:
     int maxREVsPerSize;
     int *REVsizesData;
     double *REVporositiesData;
+    bool validAnalysis;
      
 
 public:
-    ImageREV()
+    ImageREVAnalyzer()
     {
         this->method = "None";
         this->validMethod = false;
+        this->validAnalysis = false;
         this->imageData = NULL;
         this->imageWidth = 0;
         this->imageHeight = 0;
@@ -44,7 +46,7 @@ public:
         this->REVporositiesData = NULL;
     }
 
-    virtual ~ImageREV()
+    virtual ~ImageREVAnalyzer()
     {
         if(this->imageData != NULL)
         {
@@ -67,7 +69,8 @@ public:
 
     string getMethod(){ return this->method; }
     bool getValidMethod() { return this->validMethod; };
-    int* getImageData() { return this->imageData; };
+    bool getValidAnalysis() { return this->validAnalysis; };
+    uchar* getImageData() { return this->imageData; };
     int getImageWidth(){ return this->imageWidth; };
     int getImageHeight(){ return this->imageHeight;};
     int getImageDepth(){ return this->imageDepth; };
@@ -91,7 +94,12 @@ public:
         else return -1.0;
     }    
 
-    void set(vector<cv::Mat> &_sourceImages, string _method, uchar _poreColor, int _REVsizes, int _REVsamples)
+    void updateValidAnalysis(bool _valid)
+    { 
+        this->validAnalysis = _valid;
+    }
+
+    void set_old(vector<cv::Mat> &_sourceImages, string _method, uchar _poreColor, int _REVsizes, int _REVsamples)
     {
         this->method = _method;
         this->poreColor = _poreColor;
@@ -103,6 +111,83 @@ public:
         (*this).setPorosityArray();
         (*this).setSizesArray();
         (*this).convertImageData(_sourceImages);   
+    }
+
+    void set(int _count, string _method, uchar _poreColor, int _REVsamples)
+    {
+        this->imageDepth = _count;
+        this->method = _method;
+        this->poreColor = _poreColor;
+        this->maxREVsPerSize = _REVsamples;
+        (*this).checkMethod();
+        (*this).updateValidAnalysis(false);
+    }
+
+    void checkFirstImage(cv::Mat _sourceImage, int _REVsizes)
+    {
+        this->imageHeight = _sourceImage.rows;
+        this->imageWidth = _sourceImage.cols;
+        this->imageVolume = this->imageWidth * this->imageHeight * this->imageDepth;
+        (*this).setMaxREVSize(this->imageWidth, this->imageHeight, this->imageDepth);  
+        (*this).setREVSizes(_REVsizes);          
+       
+        double vol = ((double) this->imageWidth) * ((double) this->imageHeight) * ((double) this->imageDepth);
+        double max_vol = (double) INT_MAX;
+        if(vol < max_vol)
+        {
+            this->validVolume = true;
+        } 
+    }
+
+    void readImage(cv::Mat _image, int _slice)
+    {
+        uchar *currentPixel;
+        int channels = _image.channels();
+        int arrayPos;
+
+          
+        for (int y = 0; y < this->imageHeight; y++)
+        {
+            currentPixel = _image.ptr<uchar>(y);
+            for (int x = 0; x < this->imageWidth; x++)
+            {
+                arrayPos = IDX2C_3D(x, y, _slice, this->imageWidth, this->imageHeight);
+                if(currentPixel[x*channels] == this->poreColor)
+                {
+                    this->imageData[arrayPos] = 1;
+                } else {
+                    this->imageData[arrayPos] = 0;
+                }
+            }
+        }
+    
+        if(PRINT_DATA)
+        {
+                       
+            for (int y = 0; y < this->imageHeight; y++)
+            {
+                for (int x = 0; x < this->imageWidth; x++)
+                {
+                    int arrayPos = IDX2C_3D(x, y, _slice, this->imageWidth, this->imageHeight);
+                    if(this->imageData[arrayPos] == 0)
+                    {
+                        cout << "% ";
+                    } else cout << "^ ";
+                }
+
+                cout << endl;
+            }
+            cout << endl << endl;        
+        }
+
+        currentPixel = NULL;
+    }
+
+    void setArrays()
+    {
+        (*this).setImageDataArray();
+        (*this).setPorosityArray();
+        (*this).setSizesArray();
     }
 
     void checkMethod()
@@ -124,7 +209,7 @@ public:
             this->imageHeight = _sourceImages[0].rows;
             this->imageWidth = _sourceImages[0].cols;
             this->imageVolume = this->imageWidth * this->imageHeight * this->imageDepth;
-            (*this).setMaxREVSize(this->imageWidth, this->imageHeight, this->imageDepth);            
+            (*this).setMaxREVSize(this->imageWidth, this->imageHeight, this->imageDepth);              
         }
 
         double vol = ((double) this->imageWidth) * ((double) this->imageHeight) * ((double) this->imageDepth);
@@ -145,7 +230,7 @@ public:
 
     void setImageDataArray()
     {
-        this->imageData = new int[this->imageVolume];
+        this->imageData = new uchar[this->imageVolume];
     }
 
     void setREVSizes(int _maxSizes)
@@ -231,15 +316,18 @@ public:
         if(this->method == "complete")
         {
             (*this).runCompleteAnalysis();
+            (*this).updateValidAnalysis(true);
         } 
         else if(this->method == "mc")
         {
             (*this).runMonteCarloAnalysis();
+            (*this).updateValidAnalysis(true);
         } 
         else if(this->method == "center")
         {
             (*this).runCentralAnalysis();
-        } 
+            (*this).updateValidAnalysis(true);
+        }
         else
         {
             cout << "REV method is not set" << endl;
@@ -272,7 +360,7 @@ public:
             }
 
             this->REVporositiesData[size - 1] = porositySum / (double) localREVs;
-            cout << "mean porosity: " << this->REVporositiesData[size - 1] << endl;
+            cout << ", mean porosity: " << this->REVporositiesData[size - 1] << endl;
         }
     }
 
@@ -294,15 +382,10 @@ public:
             { 
                    localREVs = maxREVsPerSize;
             }
-
-            cout << "- " << sIdx+1 << "/" << this->REVsizes << " -";
-            cout << "REVs of size " << size << " (" << this->REVsizesData[sIdx] << ")";
-            cout << " = " << localREVs << "\t REV volume: " << REVVolume << endl;
             
             Xmax = (this->imageWidth - size);
             Ymax = (this->imageHeight - size);
             Zmax = (this->imageDepth - size);
-            // cout << "-- Max values: " << Xmax << "\t " << Ymax << "\t " << Zmax << endl;
 
             mRNG rngX(0, Xmax);
             mRNG rngY(0, Ymax);
@@ -310,12 +393,17 @@ public:
 
             for(int revIdx = 0; revIdx < localREVs; revIdx++)
             { 
-                // cout << "-- " << rngX() << "\t " << rngY() << "\t " << rngZ() << endl;
                 porositySum += (*this).computePorosity(rngX(), rngY(), rngZ(), size, REVVolume);        
             }
 
             this->REVporositiesData[sIdx] = porositySum / (double) localREVs;
-            cout << "mean porosity: " << this->REVporositiesData[sIdx] << endl;
+
+            if(sIdx % 10 == 0)
+            {
+                cout << "- " << sIdx+1 << "/" << this->REVsizes << " -";
+                cout << "REVs of size " << size;
+                cout << ",\tmean porosity: " << this->REVporositiesData[sIdx] << endl;
+            }
         }
     }
 
@@ -343,20 +431,19 @@ public:
             { 
                    localREVs = maxREVsPerSize;
             }
-
-            cout << "- " << sIdx+1 << "/" << this->REVsizes << " -";
-            cout << "REVs of size " << size << " (" << this->REVsizesData[sIdx] << ")";
-            cout << " = " << localREVs << "\t REV volume: " << REVVolume << endl;
-            
+          
             Xmin = Xcen - (size / 2);
             Ymin = Ycen - (size / 2);
             Zmin = Zcen - (size / 2);
 
-            // cout << "mins: {" << Xmin << ",\t" << Ymin << ",\t" << Zmin << "}\t";
-            // cout << "maxs: {" << Xmin + size << ",\t" << Ymin + size << ",\t" << Zmin + size << "}\t"; 
-            
             this->REVporositiesData[sIdx] = (*this).computePorosity(Xmin, Ymin, Zmin, size, REVVolume);
-            cout << "mean porosity: " << this->REVporositiesData[sIdx] << endl;
+
+            if(sIdx % 10 == 0)
+            {
+                cout << "- " << sIdx+1 << "/" << this->REVsizes << " -";
+                cout << "REVs of size " << size;
+                cout << ",\tmean porosity: " << this->REVporositiesData[sIdx] << endl;
+            }
         }
     }
 
@@ -376,7 +463,7 @@ public:
                 for (int x = x0; x < xF; x++)
                 {
                     arrayPos = IDX2C_3D(x, y, z, this->imageWidth, this->imageHeight);
-                    poreVolume += this->imageData[arrayPos];
+                    poreVolume += (int) this->imageData[arrayPos];
                 }
             }
         }

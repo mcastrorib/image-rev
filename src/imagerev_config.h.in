@@ -20,3 +20,4 @@ using namespace std;
 
 // define MACROS
 #define INPUT_FILE "./config/image.conf"
+#define DATAVIS_SCRIPT "./src/python/rev-visualizer.py"

@@ -8,7 +8,7 @@
 int main(int argc, char *argv[])
 {        
     ImageREVApp *app;
-    app = new ImageREVApp(INPUT_FILE);
+    app = new ImageREVApp(INPUT_FILE, DATAVIS_SCRIPT);
     app->run();
     
     delete app;

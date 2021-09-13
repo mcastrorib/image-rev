@@ -5,6 +5,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <cstdlib>
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -29,7 +30,8 @@
 
 // include ImageREV lib classes
 #include "mRNG.h"
-#include "ImageREV.h"
+#include "ImageREVAnalyzer.h"
+#include "ImageREVExtractor.h"
 #include "ImageFileParser.h"
 #include "ImageREVInput.h"
 #include "ImageREVApp.h"

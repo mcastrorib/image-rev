@@ -22,6 +22,9 @@ private:
     uchar porePhaseColor;
     int REVSizes;
     int maxREVSamples;
+    bool analysis;
+    bool datavis;
+    bool extract;
 
 public:
     ImageREVInput(const string inputFile)
@@ -45,6 +48,9 @@ public:
         this->porePhaseColor = other.porePhaseColor;
         this->REVSizes = other.REVSizes;
         this->maxREVSamples = other.maxREVSamples;
+        this->analysis = other.analysis;
+        this->datavis = other.datavis;
+        this->extract = other.extract;
     }
 
     virtual ~ImageREVInput()
@@ -62,6 +68,10 @@ public:
     uchar getPorePhaseColor() { return this->porePhaseColor; }
     int getREVSizes() { return this->REVSizes; }
     int getMaxREVSamples() { return this->maxREVSamples; }
+    bool getAnalysis() { return this->analysis; }
+    bool getDatavis() { return this->datavis; }
+    bool getExtract() { return this->extract; }
+
 
 
 
@@ -102,7 +112,10 @@ public:
                 else if(token == "REV_METHOD") (*this).readREVMethod(content);
                 else if(token == "PORE_PHASE_COLOR") (*this).readPorePhaseColor(content);   
                 else if(token == "REV_SIZES") (*this).readREVSizes(content);
-                else if(token == "MAX_REV_SAMPLES") (*this).readMaxREVSamples(content);                       
+                else if(token == "MAX_REV_SAMPLES") (*this).readMaxREVSamples(content);
+                else if(token == "ANALYSIS") (*this).readAnalysis(content);
+                else if(token == "DATAVIS") (*this).readDatavis(content);                       
+                else if(token == "EXTRACT") (*this).readExtract(content);                       
             }
         } 
 
@@ -167,6 +180,42 @@ public:
     void readMaxREVSamples(string content)
     {
         this->maxREVSamples = std::stoi(content);
+    }
+
+    void readAnalysis(string content)
+    {
+        if(content == "true" or content == "True" or content == "TRUE" or 
+           content == "yes" or content == "Yes" or content == "YES")
+        {
+            this->analysis = true;
+        } else
+        {
+            this->analysis = false;
+        }
+    }
+
+    void readDatavis(string content)
+    {
+        if(content == "true" or content == "True" or content == "TRUE" or 
+           content == "yes" or content == "Yes" or content == "YES")
+        {
+            this->datavis = true;
+        } else
+        {
+            this->datavis = false;
+        }
+    }
+
+    void readExtract(string content)
+    {
+        if(content == "true" or content == "True" or content == "TRUE" or 
+           content == "yes" or content == "Yes" or content == "YES")
+        {
+            this->extract = true;
+        } else
+        {
+            this->extract = false;
+        }
     }
 };
 
