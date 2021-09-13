@@ -16,12 +16,6 @@ private:
 	string folderName;
 	string folderPath;
 	string pyscript;
-	int X0;
-	int XF;
-	int Y0;
-	int YF;
-	int Z0;
-	int ZF;
 	int size;
 
 public:
@@ -31,12 +25,6 @@ public:
 		this->folderName = "";
 		this->folderPath = "";
 		this->pyscript = "";
-		this->X0 = 0;
-		this->XF = 0;
-		this->Y0 = 0;
-		this->YF = 0;
-		this->Z0 = 0;
-		this->ZF = 0;
 		this->size = 0;
 	}
 
@@ -46,12 +34,6 @@ public:
 		this->folderName = _folderName;
 		this->folderPath = _folderPath;
 		this->pyscript = _pyscript;
-		this->X0 = 0;
-		this->XF = 0;
-		this->Y0 = 0;
-		this->YF = 0;
-		this->Z0 = 0;
-		this->ZF = 0;
 		this->size = 0;
 	}
 
@@ -61,12 +43,6 @@ public:
 		this->folderName = other.folderName;
 		this->folderPath = other.folderPath;
 		this->pyscript = other.pyscript;
-		this->X0 = other.X0;
-		this->XF = other.XF;
-		this->Y0 = other.Y0;
-		this->YF = other.YF;
-		this->Z0 = other.Z0;
-		this->ZF = other.ZF;
 		this->size = other.size;
 	}
 
@@ -108,7 +84,7 @@ public:
 	void setExtractionSize()
 	{			
 		string userInput;
-		cout << "Select REV size: ";
+		cout << "- Select REV size: ";
 		cin >> userInput;
 		this->size = std::stoi(userInput);
 	}
@@ -142,29 +118,31 @@ public:
 
 	void extractMonteCarloREV()
 	{
-		int digits = getRequiredDigits(this->size);
-	}
+		cout << "- Extracting random REV with size " << this->size << "." << endl;
+		
+		// Define log variables
+		double progress;
+		double dSize = (double) this->size;
 
-	void extractCentralREV()
-	{
+		// Define utils
 		uchar *imageData = this->rev->getImageData();
 		string extension = ".png";
 		int digits = getRequiredDigits(this->size);
 		cv::Mat image = cv::Mat::zeros(cv::Size(this->size, this->size),CV_8UC1);
 		uchar *currentPixel;
 		
-		// Find original image central point coordinates
-        int Xcen = this->rev->getImageWidth() / 2;
-        int Ycen = this->rev->getImageHeight() / 2;
-        int Zcen = this->rev->getImageDepth() / 2;
+		// Find original image max point coordinates
+        int Xmax = this->rev->getImageWidth() - this->size;
+        int Ymax = this->rev->getImageHeight() - this->size;
+        int Zmax = this->rev->getImageDepth() - this->size;
 
-        // Setting REV cubic region coordinates 
-        int X0 = Xcen - (this->size / 2);
-        int Y0 = Ycen - (this->size / 2);
-        int Z0 = Zcen - (this->size / 2);
-        // int XF = X0 + this->size;
-        // int YF = Y0 + this->size;
-        // int ZF = Z0 + this->size;
+        // Randomly setting REV cubic region initial coordinates 
+        mRNG rngX(0, Xmax);
+        mRNG rngY(0, Ymax);
+        mRNG rngZ(0, Zmax);  
+        int X0 = rngX();
+        int Y0 = rngY();
+        int Z0 = rngZ();
 
         // Extract color info
         int arrayPos;
@@ -192,7 +170,73 @@ public:
             // Save and increment current slice 
             (*this).saveImageSlice(image, currentSlice, digits, extension);
             currentSlice++;
+
+            progress = (((double) currentSlice) / dSize);
+            cout << "\r" << "Progress: " << std::setprecision(5) << 100.0 * progress << "%          " << std::flush;            
         }
+
+        // flush last progress line
+        cout << "\r                                        \r" << std::flush; 
+	}
+
+	void extractCentralREV()
+	{
+		cout << "- Extracting central REV with size " << this->size << "." << endl;
+
+		// Define log variables
+		double progress;
+		double dSize = (double) this->size;
+
+		// Define utils
+		uchar *imageData = this->rev->getImageData();
+		string extension = ".png";
+		int digits = getRequiredDigits(this->size);
+		cv::Mat image = cv::Mat::zeros(cv::Size(this->size, this->size),CV_8UC1);
+		uchar *currentPixel;
+		
+		// Find original image central point coordinates
+        int Xcen = this->rev->getImageWidth() / 2;
+        int Ycen = this->rev->getImageHeight() / 2;
+        int Zcen = this->rev->getImageDepth() / 2;
+
+        // Setting REV cubic region coordinates 
+        int X0 = Xcen - (this->size / 2);
+        int Y0 = Ycen - (this->size / 2);
+        int Z0 = Zcen - (this->size / 2);
+
+        // Extract color info
+        int arrayPos;
+        int currentSlice = 0;
+        for(int z = 0; z < this->size; z++)
+        {
+            for (int y = 0; y < this->size; y++)
+            {
+
+            	currentPixel = image.ptr<uchar>(y);
+                for (int x = 0; x < this->size; x++)
+                {
+                    arrayPos = IDX2C_3D((X0 + x), (Y0 + y), (Z0 + z), this->rev->getImageWidth(), this->rev->getImageHeight());
+                    if(imageData[arrayPos] == 1)
+                    {
+                    	currentPixel[x] = REV_PORE_COLOR;
+                    } else
+                    {
+                    	currentPixel[x] = REV_MATRIX_COLOR;
+                    }
+                }
+
+            }
+
+            // Save and increment current slice 
+            (*this).saveImageSlice(image, currentSlice, digits, extension);
+            currentSlice++;
+        	
+        	progress = (((double) currentSlice) / dSize);
+            cout << "\r" << "Progress: " << std::setprecision(5) << 100.0 * progress << "%          " << std::flush;            
+        }
+
+        // flush last progress line
+        cout << "\r                                        \r" << std::flush; 
 	}
 
 	int getRequiredDigits(int slices)

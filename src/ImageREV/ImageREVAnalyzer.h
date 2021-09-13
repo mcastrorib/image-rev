@@ -336,7 +336,7 @@ public:
 
     void runCompleteAnalysis()
     {
-        cout << "REV complete method to be run: (to be developed)" << endl;
+        cout << "- REV analysis by complete method: (to be developed)" << endl;
         double porositySum;
         double REVVolume;
         return;
@@ -366,11 +366,13 @@ public:
 
     void runMonteCarloAnalysis()
     {
-        cout << "REV Monte Carlo method to be run" << endl;
+        cout << "- Running REV analysis by Monte Carlo method" << endl;
         double porositySum;
         double REVVolume;
         int Xmax, Ymax, Zmax;
         int size;
+        double progress;
+        double d_REVsizes = (double) this->REVsizes;
 
         for (int sIdx = 0; sIdx < this->REVsizes; sIdx++)
         {
@@ -398,23 +400,23 @@ public:
 
             this->REVporositiesData[sIdx] = porositySum / (double) localREVs;
 
-            if(sIdx % 10 == 0)
-            {
-                cout << "- " << sIdx+1 << "/" << this->REVsizes << " -";
-                cout << "REVs of size " << size;
-                cout << ",\tmean porosity: " << this->REVporositiesData[sIdx] << endl;
-            }
+            progress = (((double) sIdx + 1.0) / d_REVsizes);
+            cout << "\r" << "Progress: " << std::setprecision(5) << 100.0 * progress << "%          " << std::flush;            
         }
+
+        cout << "\r                                        \r" << std::flush;
     }
 
     void runCentralAnalysis()
     {
-        cout << "REV Centered method to be run" << endl;
+        cout << "- Running REV analysis by Centered method" << endl;
         double porositySum;
         double REVVolume;
         int Xcen, Ycen, Zcen;
         int Xmin, Ymin, Zmin;
         int size;
+        double progress;
+        double d_REVsizes = (double) this->REVsizes;
 
         // Find image central point coordinates
         Xcen = this->imageWidth / 2;
@@ -438,13 +440,11 @@ public:
 
             this->REVporositiesData[sIdx] = (*this).computePorosity(Xmin, Ymin, Zmin, size, REVVolume);
 
-            if(sIdx % 10 == 0)
-            {
-                cout << "- " << sIdx+1 << "/" << this->REVsizes << " -";
-                cout << "REVs of size " << size;
-                cout << ",\tmean porosity: " << this->REVporositiesData[sIdx] << endl;
-            }
+            progress = (((double) sIdx + 1.0) / d_REVsizes);
+            cout << "\r" << "Progress: " << std::setprecision(5) << 100.0 * progress << "%          " << std::flush;            
         }
+
+        cout << "\r                                        \r" << std::flush;
     }
 
     double computePorosity(int x0, int y0, int z0, int dim, double volume)

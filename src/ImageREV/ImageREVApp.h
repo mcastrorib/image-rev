@@ -24,6 +24,7 @@ private:
 public:
     ImageREVApp(string inputFile, string datavisPyscript)
     {
+        cout << ">> Image REV app" << endl;
         vector<cv::Mat> sourceImages();
         vector<cv::Mat> REVImages();
 
@@ -67,11 +68,15 @@ public:
         /* 
             Check if origin images are not empty or have uniform resolutions
         */
+        cout << "- Checking image data." << endl;
         string imageFile;
         cv::Mat *image;
         int width;
         int height;
         bool quit = false;
+        int imageIndex = 0;
+        double nImages = (double) this->input->getCount();
+        double progress;
 
         imageFile = this->parser->next();
         image = new cv::Mat(cv::imread(imageFile));
@@ -83,8 +88,7 @@ public:
             cout << "file: " << imageFile << "is an empty image" << endl;
             return false;
         }
-
-        cout << "Checking image data from folder " << this->input->getOriginFilePath() << endl;
+        
         while(!quit)
         {
             try 
@@ -96,12 +100,20 @@ public:
                     cout << "image list is not uniform" << endl;
                     return false;
                 }
+
+                
+                // log progress
+                imageIndex++;
+                progress = (((double) imageIndex + 1.0) / nImages);
+                cout << "\r" << "Progress: " << std::setprecision(5) << 100.0 * progress << "%          " << std::flush;
+
             } catch (const std::invalid_argument& e) 
             {
-                std::cerr << "exception: " << e.what() << std::endl; 
                 quit = true;
             }
         } 
+
+        cout << "\r                                        \r" << std::flush;
         this->parser->reset();
         return true;
     }
@@ -144,9 +156,11 @@ public:
         string imageFile;
         cv::Mat image;
         int imageIndex;
+        double nImages = (double) this->input->getCount();
+        double progress;
         bool quit = false;
 
-        cout << "Reading image data" << endl; // from folder " << this->input->getOriginFilePath() << endl;
+        cout << "- Reading image data." << endl; // from folder " << this->input->getOriginFilePath() << endl;
 
         // Reading 1st image
         imageFile = this->parser->next();
@@ -163,7 +177,7 @@ public:
             imageIndex++;
         }
 
-
+        
         while(!quit)
         {
             try 
@@ -178,6 +192,10 @@ public:
                 {
                     this->rev->readImage(image, imageIndex);
                     imageIndex++;
+
+                    // log progress
+                    progress = (((double) imageIndex + 1.0) / nImages);
+                    cout << "\r" << "Progress: " << std::setprecision(5) << 100.0 * progress << "%          " << std::flush;  
                 }
             } catch (const std::invalid_argument& e) 
             {
@@ -185,8 +203,11 @@ public:
                 quit = true;
             }
         } 
+
+        cout << "\r                                        \r" << std::flush;
         this->parser->reset();
         this->sourceImagesCount = imageIndex + 1;
+        
     }
 
     void run_old()
