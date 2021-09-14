@@ -157,4 +157,6 @@ Once the analysis is completed the REV analysis results are shown:
 </p>
 <p align="center">Figure 2: REV analysis digitalized sphere used for usage example.</p>
 
-After closing the data visualization window, the application asks if the user wants a REV extraction from the original image. Answer "yes" ("y" and "Y" are also valid) and it will asks the size of the desired REV. The extracted REV files will be saved at ``imgs`` folder inside the results directory.  
+The above image is automatically saved at the results directory.
+
+The application then asks if the user wants a REV extraction from the original image. Answer "yes" ("y" and "Y" are also valid) and it will asks for the size of the desired REV, and the extracted REV files will be saved at ``imgs`` folder inside the results directory.  
