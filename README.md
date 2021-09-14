@@ -11,7 +11,7 @@ Currently, image-rev runs only in linux and it is majorly written in C++ and req
 ## Requirements
 
 The following libraries are required:
-+ [CMake 3.8 or greater](https://cmake.org/);
++ [CMake (3.8 or greater)](https://cmake.org/);
 + [OpenCV](https://opencv.org/);
 + [Python 3](https://www.python.org/);
 + [NumPy](https://numpy.org/);
@@ -22,31 +22,31 @@ The following libraries are required:
 image-rev execution requires three steps: C++ requirements installation, Python requirements installation and Project build/compilation.
 
 For the C++ requirements, first update the package manager repositories. E.g., for Ubuntu:
-'''
+```
 sudo apt update
-'''  
+``` 
 
 If an older version of Cmake is already installed, first unninstall it with:
-'''
+```
 sudo apt --purge autoremove cmake
-'''
+```
 
 Now install CMake and OpenCV with commands
-'''
+```
 sudo snap install cmake --classic
 sudo apt install libopencv-dev python3-opencv
-'''
+```
 
 For the python requirements, we recommend using pip3 as:
-'''
+```
 pip3 install numpy
 pip3 install pandas
 pip3 install matplotlib
-'''
+```
 
-Now that all the requirements are installed, run the bash script ''install.sh'' for building the project and compiling the image-rev executable
-'''
+Now that all the requirements are installed, run the bash script ``install.sh`` for building the project and compiling the image-rev executable
+```
 ./install.sh
-''' 
+```
 
 ## How to run
