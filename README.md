@@ -90,6 +90,7 @@ A very naive application is provided as an example of usage. A list of image fil
 
 The step-by-step instructions to perform a REV analysis of these images:
 
+
 1) **Setting the input file:**
 Use your preferable text editor to edit ``image.conf`` file in ``config`` directory. We will explain each entry column by column later, but, in a nutshell, the edited content should be:
 
@@ -135,6 +136,7 @@ Fields **ANALYSIS**, **DATAVIS** and **EXTRACT** are all setted as "true", meani
 The **REV_METHOD** field is set as "center", so REVs will incrementally grow from a central position in the 3D model.
 
 **REV_SIZES** is set as "40". **MAX_REV_SIZES** is set as "1" but here it is an unused parameter.  
+
 
 2) **Running the application:**
 
