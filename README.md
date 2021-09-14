@@ -80,7 +80,7 @@ randomly throughout the volume);
 **MAX_REV_SAMPLES:** (integer) number of REV samples used for each REV size (only used for 'mc' analysis).
 
 ## Example
-A very naive application is provided as an example of usage. A list of image files representing a digitalized spherical grain is provided in the directory ``sphere`` inside the directory ``examples``. 
+A very naive application is provided as an example of usage. A list of image files representing a digitalized spherical grain 3D model is provided in the directory ``sphere`` inside the directory ``examples``. 
 
 <a name="figure1"><div id="figure1"></div></a>
 <p align="center">
@@ -89,6 +89,7 @@ A very naive application is provided as an example of usage. A list of image fil
 <p align="center">Figure 1: Slice of digitalized sphere used for usage example.</p>
 
 The step-by-step instructions to perform a REV analysis of these images:
+
 
 1) **Setting the input file:**
 Use your preferable text editor to edit ``image.conf`` file in ``config`` directory. We will explain each entry column by column later, but, in a nutshell, the edited content should be:
@@ -104,7 +105,7 @@ FIRST: 0
 COUNT: 40
 PORE_PHASE_COLOR: 0
 
-DESTINATION_PATH: ./revs/
+DESTINATION_PATH: ./examples/revs/
 DESTINATION_FILE: REV-sphere-example
 ANALYSIS: true
 DATAVIS: true
@@ -116,12 +117,42 @@ MAX_REV_SAMPLES: 1
 
 Notice we use a relative path in the **ORIGIN_PATH** field pointing to the aforementioned ``examples/sphere`` directory.
 Inside this folder, there 40 PNG images named "sphere_r=20voxels_00.png", "sphere_r=20voxels_01.png", ..., "sphere_r=20voxels_39.png". 
-
 The following fields are used to parse these file names so that the **image-rev** application correctly proccess them in the right order.
-In the **ORIGIN_FILE** field, we put the image files regular **prefix**, i.e., the invariant in all the image file names.
+
+In the **ORIGIN_FILE** field, we put the image files regular **prefix**, i.e., the invariant chars in all the image file names.
 
 The **EXTENSION** and **COUNT** fields are ".png" and "40", respectively, for obvious reasons. 
 
 The **DIGITS** field is set as "2" because that is the exactly number of digits used in the file names index order identification (*"00.png", *"01.png", *"02.png" etc).
 
 The **PORE_PHASE_COLOR** corresponds to the pixel value of the porous phase in the provided images. Here, we assume that the black pixels represent the porous phase.  
+
+In the **DESTINATION_PATH** filed, we put the relative path to directory ``examples/revs`` where REV analysis will be saved. Be sure that this directory exists in your file system.
+
+In the **DESTINATION_FILE** field, we put "REV-sphere-example" so that a new folder with this name will be created in ``examples/revs`` to store REV analysis results.
+
+Fields **ANALYSIS**, **DATAVIS** and **EXTRACT** are all setted as "true", meaning that a REV analysis will be performed, a data visualization will pop up in the user screen and a, after that, a REV will be extracted from the original image.
+
+The **REV_METHOD** field is set as "center", so REVs will incrementally grow from a central position in the 3D model.
+
+**REV_SIZES** is set as "40". Although **MAX_REV_SIZES** is set as "1", it is not used by the analysis with the "center" method.  
+
+
+2) **Running the application:**
+
+Now that the input file is set, we can run the executable from the project root directory:
+
+```
+./image-rev
+```
+
+After checking cohesion in image data, the application reads the data, builds the 3D model and start the REV analysis.
+Once the analysis is completed the REV analysis results are shown:
+
+<a name="figure2"><div id="figure2"></div></a>
+<p align="center">
+  <img src="examples/revs/REV-sphere-example_rm=center_rs=1/REV_analysis.svg">
+</p>
+<p align="center">Figure 2: REV analysis digitalized sphere used for usage example.</p>
+
+After closing the data visualization window, the application asks if the user wants a REV extraction from the original image. Answer "yes" ("y" and "Y" are also valid) and it will asks the size of the desired REV. The extracted REV files will be saved at ``imgs`` folder inside the results directory.  
