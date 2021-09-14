@@ -9,7 +9,7 @@
 
 ## Requirements
 
-The following libraries are required:
+The following software and libraries are required:
 + [CMake (3.8 or greater)](https://cmake.org/);
 + [OpenCV](https://opencv.org/);
 + [Python 3](https://www.python.org/);
