@@ -1,5 +1,7 @@
 # image-rev
 
+[![License](https://img.shields.io/badge/license-GPLv3-blue.svg)](https://github.com/mcastrorib/imagerev/blob/master/LICENSE)
+
 ## Introduction
 **image-rev** is an open-source terminal application for micro tomographic images Representative Element Volume (REV) analysis based on porosity. As input, it receives a list of pre-proccessed binary images that identifies each phase (porous or matrix). The output is a simple .csv file with the measured porosity for specific REV sizes. In addition, user's can also extract a representative volume from the original image. Currently, **image-rev** runs only in linux and it is majorly written in C++ and requires [CMake](https://cmake.org/) 3.8 or greater for project build and compilation and [OpenCV](https://opencv.org/) for image preccessing. Also, some simple [Python](https://www.python.org/) scripts for data visualization that requires [Matplotlib](https://matplotlib.org/).   
 
