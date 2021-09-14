@@ -135,7 +135,7 @@ Fields **ANALYSIS**, **DATAVIS** and **EXTRACT** are all setted as "true", meani
 
 The **REV_METHOD** field is set as "center", so REVs will incrementally grow from a central position in the 3D model.
 
-**REV_SIZES** is set as "40". **MAX_REV_SIZES** is set as "1" but here it is an unused parameter.  
+**REV_SIZES** is set as "40". Although **MAX_REV_SIZES** is set as "1", it is not used by the analysis with the "center" method.  
 
 
 2) **Running the application:**
