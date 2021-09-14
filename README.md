@@ -116,8 +116,12 @@ MAX_REV_SAMPLES: 1
 
 Notice we use a relative path in the **ORIGIN_PATH** field pointing to the aforementioned ``examples/sphere`` directory.
 Inside this folder, there 40 PNG images named "sphere_r=20voxels_00.png", "sphere_r=20voxels_01.png", ..., "sphere_r=20voxels_39.png". 
+
 The following fields are used to parse these file names so that the **image-rev** application correctly proccess them in the right order.
 In the **ORIGIN_FILE** field, we put the image files regular **prefix**, i.e., the invariant in all the image file names.
+
 The **EXTENSION** and **COUNT** fields are ".png" and "40", respectively, for obvious reasons. 
+
 The **DIGITS** field is set as "2" because that is the exactly number of digits used in the file names index order identification (*"00.png", *"01.png", *"02.png" etc).
+
 The **PORE_PHASE_COLOR** corresponds to the pixel value of the porous phase in the provided images. Here, we assume that the black pixels represent the porous phase.  
