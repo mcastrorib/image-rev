@@ -137,6 +137,7 @@ The **REV_METHOD** field is set as "center", so REVs will incrementally grow fro
 **REV_SIZES** is set as "40". **MAX_REV_SIZES** is set as "1" but here it is an unused parameter.  
 
 2) **Running the application:**
+
 Now that the input file is set, we can run the executable from the project root directory:
 
 ```
@@ -144,10 +145,12 @@ Now that the input file is set, we can run the executable from the project root 
 ```
 
 After checking cohesion in image data, the application reads the data, builds the 3D model and start the REV analysis.
-Once the analysis is completed the following image pops up:
+Once the analysis is completed the REV analysis results are shown:
 
 <a name="figure2"><div id="figure2"></div></a>
 <p align="center">
   <img src="examples/revs/REV-sphere-example_rm=center_rs=1/REV_analysis.svg">
 </p>
 <p align="center">Figure 2: REV analysis digitalized sphere used for usage example.</p>
+
+After closing the data visualization window, the application asks if the user wants a REV extraction from the original image. Answer "yes" ("y" and "Y" are also valid) and it will asks the size of the desired REV. The extracted REV files will be saved at ``imgs`` folder inside the results directory.  
