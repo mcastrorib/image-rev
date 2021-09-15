@@ -70,7 +70,7 @@ public:
         */
         cout << "- Checking image data." << endl;
         string imageFile;
-        cv::Mat *image;
+        cv::Mat image;
         int width;
         int height;
         bool quit = false;
@@ -79,9 +79,9 @@ public:
         double progress;
 
         imageFile = this->parser->next();
-        image = new cv::Mat(cv::imread(imageFile));
-        width = image->cols;
-        height = image->rows;
+        image = cv::Mat(cv::imread(imageFile));
+        width = image.cols;
+        height = image.rows;
 
         if(width == 0 || height == 0 || this->parser->getCount() == 0)
         {
@@ -94,8 +94,8 @@ public:
             try 
             {
                 imageFile = this->parser->next();
-                image = new cv::Mat(cv::imread(imageFile));
-                if(image->cols != width || image->rows != height)
+                image = cv::Mat(cv::imread(imageFile));
+                if(image.cols != width || image.rows != height)
                 {
                     cout << "image list is not uniform" << endl;
                     return false;

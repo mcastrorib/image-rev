@@ -132,30 +132,30 @@ public:
 		uchar *currentPixel;
 		
 		// Find original image max point coordinates
-        int Xmax = this->rev->getImageWidth() - this->size;
-        int Ymax = this->rev->getImageHeight() - this->size;
-        int Zmax = this->rev->getImageDepth() - this->size;
+        unsigned long int Xmax = (unsigned long int) this->rev->getImageWidth() - this->size;
+        unsigned long int Ymax = (unsigned long int) this->rev->getImageHeight() - this->size;
+        unsigned long int Zmax = (unsigned long int) this->rev->getImageDepth() - this->size;
 
         // Randomly setting REV cubic region initial coordinates 
         mRNG rngX(0, Xmax);
         mRNG rngY(0, Ymax);
         mRNG rngZ(0, Zmax);  
-        int X0 = rngX();
-        int Y0 = rngY();
-        int Z0 = rngZ();
+        unsigned long int X0 = (unsigned long int) rngX();
+        unsigned long int Y0 = (unsigned long int) rngY();
+        unsigned long int Z0 = (unsigned long int) rngZ();
 
         // Extract color info
-        int arrayPos;
+        unsigned long int arrayPos;
         int currentSlice = 0;
-        for(int z = 0; z < this->size; z++)
+        for(unsigned long int z = 0; z < this->size; z++)
         {
-            for (int y = 0; y < this->size; y++)
+            for (unsigned long int y = 0; y < this->size; y++)
             {
 
             	currentPixel = image.ptr<uchar>(y);
-                for (int x = 0; x < this->size; x++)
+                for (unsigned long int x = 0; x < this->size; x++)
                 {
-                    arrayPos = IDX2C_3D((X0 + x), (Y0 + y), (Z0 + z), this->rev->getImageWidth(), this->rev->getImageHeight());
+                    arrayPos = IDX2C_3D((X0 + x), (Y0 + y), (Z0 + z), (unsigned long int) this->rev->getImageWidth(), (unsigned long int) this->rev->getImageHeight());
                     if(imageData[arrayPos] == 1)
                     {
                     	currentPixel[x] = REV_PORE_COLOR;
@@ -195,27 +195,27 @@ public:
 		uchar *currentPixel;
 		
 		// Find original image central point coordinates
-        int Xcen = this->rev->getImageWidth() / 2;
-        int Ycen = this->rev->getImageHeight() / 2;
-        int Zcen = this->rev->getImageDepth() / 2;
+        unsigned long int Xcen = (unsigned long int) this->rev->getImageWidth() / 2;
+        unsigned long int Ycen = (unsigned long int) this->rev->getImageHeight() / 2;
+        unsigned long int Zcen = (unsigned long int) this->rev->getImageDepth() / 2;
 
         // Setting REV cubic region coordinates 
-        int X0 = Xcen - (this->size / 2);
-        int Y0 = Ycen - (this->size / 2);
-        int Z0 = Zcen - (this->size / 2);
+        unsigned long int X0 = (unsigned long int) Xcen - (this->size / 2);
+        unsigned long int Y0 = (unsigned long int) Ycen - (this->size / 2);
+        unsigned long int Z0 = (unsigned long int) Zcen - (this->size / 2);
 
         // Extract color info
-        int arrayPos;
+        unsigned long int arrayPos;
         int currentSlice = 0;
-        for(int z = 0; z < this->size; z++)
+        for(unsigned long int z = 0; z < this->size; z++)
         {
-            for (int y = 0; y < this->size; y++)
+            for (unsigned long int y = 0; y < this->size; y++)
             {
 
             	currentPixel = image.ptr<uchar>(y);
-                for (int x = 0; x < this->size; x++)
+                for (unsigned long int x = 0; x < this->size; x++)
                 {
-                    arrayPos = IDX2C_3D((X0 + x), (Y0 + y), (Z0 + z), this->rev->getImageWidth(), this->rev->getImageHeight());
+                    arrayPos = IDX2C_3D((X0 + x), (Y0 + y), (Z0 + z), (unsigned long int) this->rev->getImageWidth(), (unsigned long int) this->rev->getImageHeight());
                     if(imageData[arrayPos] == 1)
                     {
                     	currentPixel[x] = REV_PORE_COLOR;

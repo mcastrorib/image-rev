@@ -15,7 +15,7 @@ private:
     int imageWidth;
     int imageHeight;
     int imageDepth;
-    int imageVolume;
+    unsigned long int imageVolume;
     bool validVolume;
     int maxREVSize;
     uchar poreColor;
@@ -74,7 +74,7 @@ public:
     int getImageWidth(){ return this->imageWidth; };
     int getImageHeight(){ return this->imageHeight;};
     int getImageDepth(){ return this->imageDepth; };
-    int getImageVolume(){ return this->imageVolume; };
+    unsigned long int getImageVolume(){ return this->imageVolume; };
     bool getValidVolume(){ return this->validVolume; };
     int getMaxREVSize(){ return this->maxREVSize; };
     uchar getPoreColor(){ return this->poreColor;};
@@ -127,7 +127,7 @@ public:
     {
         this->imageHeight = _sourceImage.rows;
         this->imageWidth = _sourceImage.cols;
-        this->imageVolume = this->imageWidth * this->imageHeight * this->imageDepth;
+        this->imageVolume = ((unsigned long int) this->imageWidth) * ((unsigned long int) this->imageHeight) *((unsigned long int) this->imageDepth);
         (*this).setMaxREVSize(this->imageWidth, this->imageHeight, this->imageDepth);  
         (*this).setREVSizes(_REVsizes);          
        
@@ -143,15 +143,15 @@ public:
     {
         uchar *currentPixel;
         int channels = _image.channels();
-        int arrayPos;
-
+        unsigned long int arrayPos;
+        unsigned long int slice = _slice;
           
-        for (int y = 0; y < this->imageHeight; y++)
+        for (unsigned long int y = 0; y < this->imageHeight; y++)
         {
             currentPixel = _image.ptr<uchar>(y);
-            for (int x = 0; x < this->imageWidth; x++)
+            for (unsigned long int x = 0; x < this->imageWidth; x++)
             {
-                arrayPos = IDX2C_3D(x, y, _slice, this->imageWidth, this->imageHeight);
+                arrayPos = IDX2C_3D(x, y, slice, (unsigned long int) this->imageWidth, (unsigned long int) this->imageHeight);
                 if(currentPixel[x*channels] == this->poreColor)
                 {
                     this->imageData[arrayPos] = 1;
@@ -168,7 +168,7 @@ public:
             {
                 for (int x = 0; x < this->imageWidth; x++)
                 {
-                    int arrayPos = IDX2C_3D(x, y, _slice, this->imageWidth, this->imageHeight);
+                    arrayPos = IDX2C_3D(x, y, _slice, (unsigned long int) this->imageWidth, (unsigned long int) this->imageHeight);
                     if(this->imageData[arrayPos] == 0)
                     {
                         cout << "% ";
@@ -230,6 +230,12 @@ public:
 
     void setImageDataArray()
     {
+        cout << "image props: ";
+        cout << "(" <<  this->imageWidth;
+        cout << ", " <<  this->imageHeight;
+        cout << ", " <<  this->imageDepth;
+        cout << ") vol: " << this->imageVolume << endl; 
+        cout << "mem to alloc: " << (sizeof(uchar) * this->imageVolume) / (pow(10.0, 9.0)) << " GBytes." << endl;
         this->imageData = new uchar[this->imageVolume];
     }
 
@@ -266,16 +272,16 @@ public:
     {
         uchar *currentPixel;
         int channels = _sourceImages[0].channels();
-        int arrayPos;
+        unsigned long int arrayPos;
 
-        for (int z = 0; z < this->imageDepth; z++)
+        for (unsigned long int z = 0; z < this->imageDepth; z++)
         {  
-            for (int y = 0; y < this->imageHeight; y++)
+            for (unsigned long int y = 0; y < this->imageHeight; y++)
             {
                 currentPixel = _sourceImages[z].ptr<uchar>(y);
-                for (int x = 0; x < this->imageWidth; x++)
+                for (unsigned long int x = 0; x < this->imageWidth; x++)
                 {
-                    arrayPos = IDX2C_3D(x, y, z, this->imageWidth, this->imageHeight);
+                    arrayPos = IDX2C_3D(x, y, z, (unsigned long int) this->imageWidth, (unsigned long int) this->imageHeight);
                     if(currentPixel[x*channels] == this->poreColor)
                     {
                         this->imageData[arrayPos] = 1;
@@ -295,7 +301,7 @@ public:
                 {
                     for (int x = 0; x < this->imageWidth; x++)
                     {
-                        int arrayPos = IDX2C_3D(x, y, z, this->imageWidth, this->imageHeight);
+                        arrayPos = IDX2C_3D(x, y, z, (unsigned long int) this->imageWidth, (unsigned long int) this->imageHeight);
                         if(this->imageData[arrayPos] == 0)
                         {
                             cout << "% ";
@@ -452,18 +458,18 @@ public:
         int xF = x0 + dim;
         int yF = y0 + dim;
         int zF = z0 + dim;
-        int arrayPos;
-        int poreVolume = 0;
+        unsigned long int arrayPos;
+        unsigned long int poreVolume = 0;
 
-        for(int z = z0; z < zF; z++)
+        for(unsigned long int z = z0; z < zF; z++)
         {
-            for (int y = y0; y < yF; y++)
+            for (unsigned long int y = y0; y < yF; y++)
             {
 
-                for (int x = x0; x < xF; x++)
+                for (unsigned long int x = x0; x < xF; x++)
                 {
-                    arrayPos = IDX2C_3D(x, y, z, this->imageWidth, this->imageHeight);
-                    poreVolume += (int) this->imageData[arrayPos];
+                    arrayPos = IDX2C_3D(x, y, z, (unsigned long int) this->imageWidth, (unsigned long int) this->imageHeight);
+                    poreVolume += (unsigned long int) this->imageData[arrayPos];
                 }
             }
         }

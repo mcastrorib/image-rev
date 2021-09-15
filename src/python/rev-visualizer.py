@@ -20,6 +20,15 @@ def main(dirpath):
 
 	plt.tight_layout()
 	plt.show()
+
+	fig, axs = plt.subplots(1,1, figsize=[6,5])
+	REV_figpath = os.path.join(dirpath, 'REV_analysis.svg')
+	axs.plot(REV_sizes, REV_phis, 'o-', ms=4)
+	axs.set_ylim([0, 1])
+	axs.set_xlim([0, 1.01*REV_sizes.max()])
+	axs.set_xlabel('REV size (voxels)')
+	axs.set_ylabel('Porosity')
+	plt.savefig(REV_figpath, format='svg')
 	return
 
 if __name__ == "__main__":
