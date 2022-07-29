@@ -145,18 +145,50 @@ public:
         int channels = _image.channels();
         unsigned long int arrayPos;
         unsigned long int slice = _slice;
-          
-        for (unsigned long int y = 0; y < this->imageHeight; y++)
-        {
-            currentPixel = _image.ptr<uchar>(y);
-            for (unsigned long int x = 0; x < this->imageWidth; x++)
+        
+        if(channels == 1)
+        {  
+            for (unsigned long int y = 0; y < this->imageHeight; y++)
             {
-                arrayPos = IDX2C_3D(x, y, slice, (unsigned long int) this->imageWidth, (unsigned long int) this->imageHeight);
-                if(currentPixel[x*channels] == this->poreColor)
+                currentPixel = _image.ptr<uchar>(y);
+                for (unsigned long int x = 0; x < this->imageWidth; x++)
                 {
-                    this->imageData[arrayPos] = 1;
-                } else {
-                    this->imageData[arrayPos] = 0;
+                    arrayPos = IDX2C_3D(x, y, slice, (unsigned long int) this->imageWidth, (unsigned long int) this->imageHeight);
+                    this->imageData[arrayPos] = currentPixel[x*channels];
+                    // if(currentPixel[x*channels] == this->poreColor)
+                    // {
+                    //     this->imageData[arrayPos] = 1;
+                    // } else {
+                    //     this->imageData[arrayPos] = 0;
+                    // }
+                }
+            }
+        } else
+        {
+            uchar upixel;
+            uint ipixel;
+                
+            for (unsigned long int y = 0; y < this->imageHeight; y++)
+            {
+                currentPixel = _image.ptr<uchar>(y);
+                for (unsigned long int x = 0; x < this->imageWidth; x++)
+                {
+                    arrayPos = IDX2C_3D(x, y, slice, (unsigned long int) this->imageWidth, (unsigned long int) this->imageHeight);
+                    ipixel = 0;
+                    for(uint curr = 0; curr < channels; curr++)
+                    {
+                        ipixel += (uint) currentPixel[x*channels + curr];
+                    }
+                    upixel = (uchar) (ipixel/channels);
+                    this->imageData[arrayPos] = upixel;
+
+                    // cout << (uint) upixel << " ";
+                    // if(currentPixel[x*channels] == this->poreColor)
+                    // {
+                    //     this->imageData[arrayPos] = 1;
+                    // } else {
+                    //     this->imageData[arrayPos] = 0;
+                    // }
                 }
             }
         }
@@ -469,7 +501,7 @@ public:
                 for (unsigned long int x = x0; x < xF; x++)
                 {
                     arrayPos = IDX2C_3D(x, y, z, (unsigned long int) this->imageWidth, (unsigned long int) this->imageHeight);
-                    poreVolume += (unsigned long int) this->imageData[arrayPos];
+                    poreVolume += (unsigned long int) (this->imageData[arrayPos] == this->poreColor);
                 }
             }
         }

@@ -156,13 +156,14 @@ public:
                 for (unsigned long int x = 0; x < this->size; x++)
                 {
                     arrayPos = IDX2C_3D((X0 + x), (Y0 + y), (Z0 + z), (unsigned long int) this->rev->getImageWidth(), (unsigned long int) this->rev->getImageHeight());
-                    if(imageData[arrayPos] == 1)
-                    {
-                    	currentPixel[x] = REV_PORE_COLOR;
-                    } else
-                    {
-                    	currentPixel[x] = REV_MATRIX_COLOR;
-                    }
+                    currentPixel[x] = imageData[arrayPos];
+                    // if(imageData[arrayPos] == 1)
+                    // {
+                    // 	currentPixel[x] = REV_PORE_COLOR;
+                    // } else
+                    // {
+                    // 	currentPixel[x] = REV_MATRIX_COLOR;
+                    // }
                 }
 
             }
@@ -216,13 +217,14 @@ public:
                 for (unsigned long int x = 0; x < this->size; x++)
                 {
                     arrayPos = IDX2C_3D((X0 + x), (Y0 + y), (Z0 + z), (unsigned long int) this->rev->getImageWidth(), (unsigned long int) this->rev->getImageHeight());
-                    if(imageData[arrayPos] == 1)
-                    {
-                    	currentPixel[x] = REV_PORE_COLOR;
-                    } else
-                    {
-                    	currentPixel[x] = REV_MATRIX_COLOR;
-                    }
+                    currentPixel[x] = imageData[arrayPos];
+                    // if(imageData[arrayPos] == 1)
+                    // {
+                    // 	currentPixel[x] = REV_PORE_COLOR;
+                    // } else
+                    // {
+                    // 	currentPixel[x] = REV_MATRIX_COLOR;
+                    // }
                 }
 
             }
