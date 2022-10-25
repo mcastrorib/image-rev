@@ -54,6 +54,11 @@ public:
 		}
 	}
 
+	uchar convertRGBtoGrayscale(uchar red, uchar green, uchar blue)
+	{
+	    return ((red * 7 / 255) << 5) + ((green * 7 / 255) << 2) + (blue * 3 / 255);   
+	}
+
 	void runExtraction()
 	{
 		string userInput;
