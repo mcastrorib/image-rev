@@ -163,24 +163,22 @@ public:
                     // }
                 }
             }
-        } else
+        } else if(channels >= 3)
         {
-            uchar upixel;
-            uint ipixel;
-                
+            uchar rpixel;
+            uchar gpixel;
+            uchar bpixel;
+            
             for (unsigned long int y = 0; y < this->imageHeight; y++)
             {
                 currentPixel = _image.ptr<uchar>(y);
                 for (unsigned long int x = 0; x < this->imageWidth; x++)
                 {
                     arrayPos = IDX2C_3D(x, y, slice, (unsigned long int) this->imageWidth, (unsigned long int) this->imageHeight);
-                    ipixel = 0;
-                    for(uint curr = 0; curr < channels; curr++)
-                    {
-                        ipixel += (uint) currentPixel[x*channels + curr];
-                    }
-                    upixel = (uchar) (ipixel/channels);
-                    this->imageData[arrayPos] = upixel;
+                    rpixel = currentPixel[x*channels + 0];
+                    gpixel = currentPixel[x*channels + 1];
+                    bpixel = currentPixel[x*channels + 2];
+                    this->imageData[arrayPos] = (*this).convertRGBtoGrayscale(rpixel, gpixel, bpixel);
 
                     // cout << (uint) upixel << " ";
                     // if(currentPixel[x*channels] == this->poreColor)
@@ -201,7 +199,7 @@ public:
                 for (int x = 0; x < this->imageWidth; x++)
                 {
                     arrayPos = IDX2C_3D(x, y, _slice, (unsigned long int) this->imageWidth, (unsigned long int) this->imageHeight);
-                    if(this->imageData[arrayPos] == 0)
+                    if(this->imageData[arrayPos] == this->poreColor)
                     {
                         cout << "% ";
                     } else cout << "^ ";
@@ -347,6 +345,11 @@ public:
         }
 
         currentPixel = NULL;
+    }
+
+    uchar convertRGBtoGrayscale(uchar red, uchar green, uchar blue)
+    {
+        return ((red * 7 / 255) << 5) + ((green * 7 / 255) << 2) + (blue * 3 / 255);   
     }
 
     void runAnalysis()
