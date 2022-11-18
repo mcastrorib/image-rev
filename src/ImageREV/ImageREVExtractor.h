@@ -211,6 +211,8 @@ public:
         unsigned long int X0 = (unsigned long int) Xcen - (this->size / 2);
         unsigned long int Y0 = (unsigned long int) Ycen - (this->size / 2);
         unsigned long int Z0 = (unsigned long int) Zcen - (this->size / 2);
+        cout << "Extracting REV from {" << X0 << ", " << Y0 << ", " << Z0 << "}";
+        cout << "to {" << X0+this->size << ", " << Y0+this->size << ", " << Z0+this->size << "}" << endl;
 
         // Extract color info
         unsigned long int arrayPos;
