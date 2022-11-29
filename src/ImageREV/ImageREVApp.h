@@ -79,7 +79,7 @@ public:
         double progress;
 
         imageFile = this->parser->next();
-        image = cv::Mat(cv::imread(imageFile));
+        image = cv::Mat(cv::imread(imageFile, cv::IMREAD_GRAYSCALE));
         width = image.cols;
         height = image.rows;
 
@@ -94,7 +94,7 @@ public:
             try 
             {
                 imageFile = this->parser->next();
-                image = cv::Mat(cv::imread(imageFile));
+                image = cv::Mat(cv::imread(imageFile, cv::IMREAD_GRAYSCALE));
                 if(image.cols != width || image.rows != height)
                 {
                     cout << "image list is not uniform" << endl;
@@ -164,7 +164,7 @@ public:
 
         // Reading 1st image
         imageFile = this->parser->next();
-        image = cv::Mat(cv::imread(imageFile));
+        image = cv::Mat(cv::imread(imageFile, cv::IMREAD_GRAYSCALE));
         if (!image.data)
         {
             cout << "Error: No image data in file " << imageFile << endl;
@@ -183,7 +183,7 @@ public:
             try 
             {
                 imageFile = this->parser->next();
-                image = cv::Mat(cv::imread(imageFile));
+                image = cv::Mat(cv::imread(imageFile, cv::IMREAD_GRAYSCALE));
                 if (!image.data)
                 {
                     cout << "Error: No image data in file " << imageFile << endl;

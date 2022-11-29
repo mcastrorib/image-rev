@@ -24,7 +24,7 @@ private:
     int *REVsizesData;
     double *REVporositiesData;
     bool validAnalysis;
-     
+    map<uchar,double> colorsCount;     
 
 public:
     ImageREVAnalyzer()
@@ -145,51 +145,17 @@ public:
         int channels = _image.channels();
         unsigned long int arrayPos;
         unsigned long int slice = _slice;
-        
-        if(channels == 1)
-        {  
-            for (unsigned long int y = 0; y < this->imageHeight; y++)
-            {
-                currentPixel = _image.ptr<uchar>(y);
-                for (unsigned long int x = 0; x < this->imageWidth; x++)
-                {
-                    arrayPos = IDX2C_3D(x, y, slice, (unsigned long int) this->imageWidth, (unsigned long int) this->imageHeight);
-                    this->imageData[arrayPos] = currentPixel[x*channels];
-                    // if(currentPixel[x*channels] == this->poreColor)
-                    // {
-                    //     this->imageData[arrayPos] = 1;
-                    // } else {
-                    //     this->imageData[arrayPos] = 0;
-                    // }
-                }
-            }
-        } else if(channels >= 3)
-        {
-            uchar rpixel;
-            uchar gpixel;
-            uchar bpixel;
-            
-            for (unsigned long int y = 0; y < this->imageHeight; y++)
-            {
-                currentPixel = _image.ptr<uchar>(y);
-                for (unsigned long int x = 0; x < this->imageWidth; x++)
-                {
-                    arrayPos = IDX2C_3D(x, y, slice, (unsigned long int) this->imageWidth, (unsigned long int) this->imageHeight);
-                    rpixel = currentPixel[x*channels + 0];
-                    gpixel = currentPixel[x*channels + 1];
-                    bpixel = currentPixel[x*channels + 2];
-                    this->imageData[arrayPos] = (*this).convertRGBtoGrayscale(rpixel, gpixel, bpixel);
 
-                    // cout << (uint) upixel << " ";
-                    // if(currentPixel[x*channels] == this->poreColor)
-                    // {
-                    //     this->imageData[arrayPos] = 1;
-                    // } else {
-                    //     this->imageData[arrayPos] = 0;
-                    // }
-                }
+        for (unsigned long int y = 0; y < this->imageHeight; y++)
+        {
+            currentPixel = _image.ptr<uchar>(y);
+            for (unsigned long int x = 0; x < this->imageWidth; x++)
+            {
+                arrayPos = IDX2C_3D(x, y, slice, (unsigned long int) this->imageWidth, (unsigned long int) this->imageHeight);
+                this->imageData[arrayPos] = currentPixel[x];
             }
         }
+        
     
         if(PRINT_DATA)
         {
@@ -354,6 +320,8 @@ public:
 
     void runAnalysis()
     {
+        (*this).computeHist();
+
         if(this->method == "complete")
         {
             (*this).runCompleteAnalysis();
@@ -373,6 +341,51 @@ public:
         {
             cout << "REV method is not set" << endl;
         }
+    }
+
+    void computeHist()
+    {
+        cout << "- Computing colors frequency." << endl;
+        unsigned long int arrayPos;
+        uchar color;
+        double nImages = this->imageDepth;
+        double progress;
+
+        for(unsigned long int z = 0; z < this->imageDepth; z++)
+        {
+            for (unsigned long int y = 0; y < this->imageHeight; y++)
+            {
+                for (unsigned long int x = 0; x < this->imageWidth; x++)
+                {
+                    arrayPos = IDX2C_3D(x, y, z, (unsigned long int) this->imageWidth, (unsigned long int) this->imageHeight);
+                    color = this->imageData[arrayPos];        
+                    if(this->colorsCount.find(color) == this->colorsCount.end()) this->colorsCount[color] = 1.0;
+                    else this->colorsCount[color] += 1.0;
+                }
+            }
+            progress = (((double) z + 1.0) / nImages);
+            cout << "\r" << "Progress: " << std::setprecision(5) << 100.0 * progress << "%          " << std::flush;  
+        }
+        cout << "\r                                        \r" << std::flush;
+        
+        cout << "---------------------------" << endl;
+        cout << "[color]: [freq]" << endl;
+        map<uchar, double>::iterator it;
+        for (it = this->colorsCount.begin(); it != this->colorsCount.end(); it++)
+        {
+            cout << (uint) it->first
+                 << ": \t"
+                 << 100.0*it->second / this->imageVolume
+                 << "%"
+                 << endl;
+        } 
+        cout << "---------------------------" << endl;
+
+        string userInput;
+        cout << "- Assign pore color as: ";
+        cin >> userInput;
+
+        this->poreColor = (uchar) std::stoi(userInput);
     }
 
     void runCompleteAnalysis()
