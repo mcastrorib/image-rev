@@ -62,7 +62,7 @@ public:
 	void runExtraction()
 	{
 		string userInput;
-		cout << "- Do you want to extract REV from original image? (y/n): ";
+		cout << "- Do you want to extract REV from original image? (y/[n]): ";
 		cin >> userInput;
 
 		if(userInput == "y")
@@ -108,13 +108,20 @@ public:
 
 	void extractREV(string _method)
 	{
+		string userInput;
+		cout << "- Do you want to binarize original image? (y/[n]): ";
+		cin >> userInput;
+
 		if(_method == "mc")
 		{
-			(*this).extractMonteCarloREV();
+			if(userInput == "y") (*this).extractMonteCarloBinaryREV();
+			else (*this).extractMonteCarloREV();
 		} 
 		else if(_method == "center")
 		{
-			(*this).extractCentralREV();
+			if(userInput == "y") (*this).extractCentralBinaryREV();
+			else (*this).extractCentralREV();
+;
 		} else
 		{
 			cout << "method not specified" << endl;
@@ -164,13 +171,70 @@ public:
                 {
                     arrayPos = IDX2C_3D((X0 + x), (Y0 + y), (Z0 + z), (unsigned long int) this->rev->getImageWidth(), (unsigned long int) this->rev->getImageHeight());
                     currentPixel[x] = imageData[arrayPos];
-                    // if(imageData[arrayPos] == 1)
-                    // {
-                    // 	currentPixel[x] = REV_PORE_COLOR;
-                    // } else
-                    // {
-                    // 	currentPixel[x] = REV_MATRIX_COLOR;
-                    // }
+                }
+            }
+
+            // Save and increment current slice 
+            (*this).saveImageSlice(image, currentSlice, digits, extension);
+            currentSlice++;
+
+            progress = (((double) currentSlice) / dSize);
+            cout << "\r" << "Progress: " << std::setprecision(5) << 100.0 * progress << "%          " << std::flush;            
+        }
+
+        // flush last progress line
+        cout << "\r                                        \r" << std::flush; 
+
+        // Set pointers as Null
+        imageData = NULL;
+        currentPixel = NULL;
+
+	}
+
+	void extractMonteCarloBinaryREV()
+	{
+		cout << "- Extracting random binary REV with size " << this->size << "." << endl;
+		
+		// Define log variables
+		double progress;
+		double dSize = (double) this->size;
+
+		// Define utils
+		uchar *imageData = this->rev->getImageData();
+		string extension = ".png";
+		int digits = getRequiredDigits(this->size);
+		cv::Mat image = cv::Mat::zeros(cv::Size(this->size, this->size),CV_8UC1);
+		uchar *currentPixel;
+		
+		// Find original image max point coordinates
+        unsigned long int Xmax = (unsigned long int) this->rev->getImageWidth() - this->size;
+        unsigned long int Ymax = (unsigned long int) this->rev->getImageHeight() - this->size;
+        unsigned long int Zmax = (unsigned long int) this->rev->getImageDepth() - this->size;
+
+        // Randomly setting REV cubic region initial coordinates 
+        mRNG rngX(0, Xmax);
+        mRNG rngY(0, Ymax);
+        mRNG rngZ(0, Zmax);  
+        unsigned long int X0 = (unsigned long int) rngX();
+        unsigned long int Y0 = (unsigned long int) rngY();
+        unsigned long int Z0 = (unsigned long int) rngZ();
+        cout << "Extracting REV from {" << X0 << ", " << Y0 << ", " << Z0 << "} ";
+        cout << "to {" << X0+this->size << ", " << Y0+this->size << ", " << Z0+this->size << "}" << endl;
+
+        // Extract color info
+        unsigned long int arrayPos;
+        int currentSlice = 0;
+        for(unsigned long int z = 0; z < this->size; z++)
+        {
+            for (unsigned long int y = 0; y < this->size; y++)
+            {
+
+            	currentPixel = image.ptr<uchar>(y);
+                for (unsigned long int x = 0; x < this->size; x++)
+                {
+                    arrayPos = IDX2C_3D((X0 + x), (Y0 + y), (Z0 + z), (unsigned long int) this->rev->getImageWidth(), (unsigned long int) this->rev->getImageHeight());
+                    if(imageData[arrayPos] == this->rev->getPoreColor()) currentPixel[x] = 0;
+                    else currentPixel[x] = 127;
                 }
 
             }
@@ -185,6 +249,10 @@ public:
 
         // flush last progress line
         cout << "\r                                        \r" << std::flush; 
+        
+        // Set pointers as Null
+        imageData = NULL;
+        currentPixel = NULL;
 	}
 
 	void extractCentralREV()
@@ -227,13 +295,6 @@ public:
                 {
                     arrayPos = IDX2C_3D((X0 + x), (Y0 + y), (Z0 + z), (unsigned long int) this->rev->getImageWidth(), (unsigned long int) this->rev->getImageHeight());
                     currentPixel[x] = imageData[arrayPos];
-                    // if(imageData[arrayPos] == 1)
-                    // {
-                    // 	currentPixel[x] = REV_PORE_COLOR;
-                    // } else
-                    // {
-                    // 	currentPixel[x] = REV_MATRIX_COLOR;
-                    // }
                 }
 
             }
@@ -248,6 +309,72 @@ public:
 
         // flush last progress line
         cout << "\r                                        \r" << std::flush; 
+
+        // Set pointers as Null
+        imageData = NULL;
+        currentPixel = NULL;
+
+	}
+
+	void extractCentralBinaryREV()
+	{
+		cout << "- Extracting central binary REV with size " << this->size << "." << endl;
+
+		// Define log variables
+		double progress;
+		double dSize = (double) this->size;
+
+		// Define utils
+		uchar *imageData = this->rev->getImageData();
+		string extension = ".png";
+		int digits = getRequiredDigits(this->size);
+		cv::Mat image = cv::Mat::zeros(cv::Size(this->size, this->size),CV_8UC1);
+		uchar *currentPixel;
+		
+		// Find original image central point coordinates
+        unsigned long int Xcen = (unsigned long int) this->rev->getImageWidth() / 2;
+        unsigned long int Ycen = (unsigned long int) this->rev->getImageHeight() / 2;
+        unsigned long int Zcen = (unsigned long int) this->rev->getImageDepth() / 2;
+
+        // Setting REV cubic region coordinates 
+        unsigned long int X0 = (unsigned long int) Xcen - (this->size / 2);
+        unsigned long int Y0 = (unsigned long int) Ycen - (this->size / 2);
+        unsigned long int Z0 = (unsigned long int) Zcen - (this->size / 2);
+        cout << "Extracting REV from {" << X0 << ", " << Y0 << ", " << Z0 << "} ";
+        cout << "to {" << X0+this->size << ", " << Y0+this->size << ", " << Z0+this->size << "}" << endl;
+
+        // Extract color info
+        unsigned long int arrayPos;
+        int currentSlice = 0;
+        for(unsigned long int z = 0; z < this->size; z++)
+        {
+            for (unsigned long int y = 0; y < this->size; y++)
+            {
+
+            	currentPixel = image.ptr<uchar>(y);
+                for (unsigned long int x = 0; x < this->size; x++)
+                {
+                    arrayPos = IDX2C_3D((X0 + x), (Y0 + y), (Z0 + z), (unsigned long int) this->rev->getImageWidth(), (unsigned long int) this->rev->getImageHeight());
+                    if(imageData[arrayPos] == this->rev->getPoreColor()) currentPixel[x] = 0;
+                    else currentPixel[x] = 127;
+                }
+
+            }
+
+            // Save and increment current slice 
+            (*this).saveImageSlice(image, currentSlice, digits, extension);
+            currentSlice++;
+        	
+        	progress = (((double) currentSlice) / dSize);
+            cout << "\r" << "Progress: " << std::setprecision(5) << 100.0 * progress << "%          " << std::flush;            
+        }
+
+        // flush last progress line
+        cout << "\r                                        \r" << std::flush; 
+        
+        // Set pointers as Null
+        imageData = NULL;
+        currentPixel = NULL;
 	}
 
 	int getRequiredDigits(int slices)
