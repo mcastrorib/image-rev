@@ -25,6 +25,7 @@ private:
     bool analysis;
     bool datavis;
     bool extract;
+    bool merge;
 
 public:
     ImageREVInput(const string inputFile)
@@ -51,6 +52,7 @@ public:
         this->analysis = other.analysis;
         this->datavis = other.datavis;
         this->extract = other.extract;
+        this->merge = other.merge;
     }
 
     virtual ~ImageREVInput()
@@ -71,6 +73,7 @@ public:
     bool getAnalysis() { return this->analysis; }
     bool getDatavis() { return this->datavis; }
     bool getExtract() { return this->extract; }
+    bool getMerge() { return this->merge; }
 
 
 
@@ -115,7 +118,8 @@ public:
                 else if(token == "MAX_REV_SAMPLES") (*this).readMaxREVSamples(content);
                 else if(token == "ANALYSIS") (*this).readAnalysis(content);
                 else if(token == "DATAVIS") (*this).readDatavis(content);                       
-                else if(token == "EXTRACT") (*this).readExtract(content);                       
+                else if(token == "EXTRACT") (*this).readExtract(content);
+                else if(token == "MERGE") (*this).readMerge(content);                       
             }
         } 
 
@@ -215,6 +219,18 @@ public:
         } else
         {
             this->extract = false;
+        }
+    }
+
+    void readMerge(string content)
+    {
+        if(content == "true" or content == "True" or content == "TRUE" or 
+           content == "yes" or content == "Yes" or content == "YES")
+        {
+            this->merge = true;
+        } else
+        {
+            this->merge = false;
         }
     }
 };

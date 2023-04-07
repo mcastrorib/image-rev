@@ -321,6 +321,8 @@ public:
     void runAnalysis()
     {
         (*this).computeHist();
+        (*this).mergePhases();
+        (*this).assignPoreColor();
 
         if(this->method == "complete")
         {
@@ -346,6 +348,9 @@ public:
     void computeHist()
     {
         cout << "- Computing colors frequency." << endl;
+
+        (*this).clearHist();
+
         unsigned long int arrayPos;
         uchar color;
         double nImages = this->imageDepth;
@@ -367,7 +372,77 @@ public:
             cout << "\r" << "Progress: " << std::setprecision(5) << 100.0 * progress << "%          " << std::flush;  
         }
         cout << "\r                                        \r" << std::flush;
+
+        showColorHist();
+    }
+
+    void mergePhases() {
+
+        string userInput;
+        bool redoHist = false;
+        cout << "- Do you want to merge phases? (y/[n]): ";
+        cin >> userInput;
+
+        while(userInput == "y")
+        {
+            string colorInput;
+            cout << "- Assign color to be merged: ";
+            cin >> colorInput;
+            uchar mergedColor = (uchar) std::stoi(colorInput);
+
+            cout << "- Assign base color: ";
+            cin >> colorInput;
+            uchar baseColor = (uchar) std::stoi(colorInput);
+
+            (*this).mergeColors(mergedColor, baseColor);
+
+            redoHist = true;
+            cout << "- Do you want to merge other phases? (y/[n]): ";
+            cin >> userInput;
+        }
+
+        if(redoHist) {
+            cout << "- Colors histogram is out of date." << endl;
+            (*this).computeHist();
+        }
+    }
+
+    
+    void mergeColors(uchar mergedColor, uchar baseColor) {
         
+        unsigned long int arrayPos;
+        double nImages = this->imageDepth;
+        double progress;
+
+        for(unsigned long int z = 0; z < this->imageDepth; z++)
+        {
+            for (unsigned long int y = 0; y < this->imageHeight; y++)
+            {
+                for (unsigned long int x = 0; x < this->imageWidth; x++)
+                {
+                    
+                    arrayPos = IDX2C_3D(x, y, z, (unsigned long int) this->imageWidth, (unsigned long int) this->imageHeight);
+                    if(this->imageData[arrayPos] == mergedColor) 
+                        this->imageData[arrayPos] = baseColor;
+                }
+            }
+
+            progress = (((double) z + 1.0) / nImages);
+            cout << "\r" << "Progress: " << std::setprecision(5) << 100.0 * progress << "%          " << std::flush;  
+        }
+        cout << endl;
+    }
+
+    void clearHist() {
+        map<uchar, double>::iterator it;
+        for (it = this->colorsCount.begin(); it != this->colorsCount.end(); it++)
+        {
+            it->second = 0.0;
+        } 
+    }
+
+
+    void showColorHist() {
         cout << "---------------------------" << endl;
         cout << "[color]: [freq]" << endl;
         map<uchar, double>::iterator it;
@@ -380,7 +455,9 @@ public:
                  << endl;
         } 
         cout << "---------------------------" << endl;
+    }
 
+    void assignPoreColor() {
         string userInput;
         cout << "- Assign pore color as: ";
         cin >> userInput;
